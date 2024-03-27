@@ -14,7 +14,7 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock /app/
 
-RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --with app --no-root && rm -rf $POETRY_CACHE_DIR
 
 FROM python:3.11-slim-bullseye AS runtime
 
@@ -30,4 +30,4 @@ COPY --chown=runner . /app
 
 USER runner
 
-CMD ["/app/.venv/bin/python", "bot.py"]
+CMD ["/app/.venv/bin/python", "app.py"]
