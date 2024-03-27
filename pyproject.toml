@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "simplecurrencyconverter"
+version = "0.1.0"
+description = ""
+authors = ["Dmitry Kirilovskiy <dikirilovsiy@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[tool.poetry.group.app.dependencies]
+loguru = "^0.7.2"
+aiohttp = "^3.9.3"
+python-telegram-bot = {extras = ["job-queue"], version = "^21.0.1"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
