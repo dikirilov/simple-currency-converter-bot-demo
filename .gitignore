@@ -1,0 +1,5 @@
+*.drawio
+*/__pycache__/*
+__pycache__/*
+.idea
+poetry.lock
