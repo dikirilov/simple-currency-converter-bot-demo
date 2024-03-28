@@ -12,7 +12,7 @@ from loguru import logger
 logger.remove()
 logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{module}</blue> | <lvl>{level}</lvl> | "
                                              "{message}", serialize=False)
-REGEXP = os.getenv("REGEXP", "^([-+/*]?\d+(\.\d+)?)*$")
+REGEXP = os.getenv("REGEXP")
 
 
 class Converter:

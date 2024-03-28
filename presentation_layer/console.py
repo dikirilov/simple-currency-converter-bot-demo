@@ -1,5 +1,4 @@
 import asyncio
-
 from presentation_layer.presentation import Ui
 from business_layer.converter import Converter
 import sys

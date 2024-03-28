@@ -11,8 +11,6 @@ from loguru import logger
 logger.remove()
 logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{module}</blue> | <lvl>{level}</lvl> | "
                                              "{message}", serialize=False)
-#TOKEN = "7181431320:AAGp8NDXTOgerQKT4DjjdMEP-boa45F9rOM"
-#BOTNAME = "@Currency2RubConverterBot"
 
 
 class TelegramBot(Ui):

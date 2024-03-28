@@ -11,8 +11,8 @@ import sys
 logger.remove()
 logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{module}</blue> | <lvl>{level}</lvl> | "
                                              "{message}", serialize=False)
-URL = os.getenv("URL", "http://www.cbr.ru/scripts/XML_daily.asp")
-TIMEOUT = int(os.getenv("TIMEOUT", "5"))
+URL = os.getenv("URL")
+TIMEOUT = int(os.getenv("TIMEOUT"))
 
 
 class CurrencyUpdater(Protocol):

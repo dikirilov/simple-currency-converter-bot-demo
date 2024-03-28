@@ -1,9 +1,4 @@
-from models.currency_rate import Currency2RubRate
-from models.currency import Currency
-from typing import Iterable, Protocol
-import xml.etree.ElementTree as ET
-import aiohttp
-import os
+from typing import Protocol
 from loguru import logger
 import sys
 
