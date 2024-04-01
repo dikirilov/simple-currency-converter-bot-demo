@@ -9,5 +9,5 @@ logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{mod
 
 
 class Ui(Protocol):
-    async def run(self) -> None:
+    def run(self) -> None:
         raise NotImplementedError

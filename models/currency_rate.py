@@ -16,7 +16,7 @@ class Currency2RubRate:
                  curr: Currency,
                  rate: float
                  ):
-        self.__id = uuid.uuid4()
+        self.__id = str(uuid.uuid4())
         self.__curr : Currency = curr
         self.__rate : float = rate
         self.__created_at = datetime.now()

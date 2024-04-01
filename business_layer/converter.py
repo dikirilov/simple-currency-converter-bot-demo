@@ -1,8 +1,8 @@
 import re
-import ast
 from business_layer.currency_updater import CurrencyUpdater
 from datetime import datetime
 from models.currency_rate import Currency2RubRate
+from models.converted_query import ConvertedQuery
 from typing import Any, Tuple, Iterable
 import os
 import sys
@@ -50,17 +50,23 @@ class Converter:
             return matched
         return None
 
-    async def parse_request(self, request: Any) -> Tuple[Iterable[Currency2RubRate], float]:
+    async def parse_request(self, request: Any) -> Iterable[ConvertedQuery]:
         if request is None:
             raise ValueError("Request cannot be empty")
         if not isinstance(request, str):
             raise ValueError("Request must be a string")
-        expr, currency_marker = map(str.strip, request.split())
+        req_params = []
+        req_params.extend(map(str.strip, request.split()))
+        if len(req_params) > 1:
+            expr, currency_marker = req_params
+        else:
+            currency_marker = req_params[0]
+            expr = "1"
         amount = await self.parse_expression(expr)
         if currency_marker is None or currency_marker == "":
             raise ValueError(f"Currency is not recognized (empty): '{currency_marker}'")
         if currs := await self.match_curr(currency_marker):
-            return currs, amount
+            return [ConvertedQuery(curr_rate, amount) for curr_rate in currs]
         else:
             raise ValueError(f"Currency '{currency_marker}' is not recognized")
 

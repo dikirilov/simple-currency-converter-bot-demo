@@ -1,0 +1,6 @@
+*.drawio
+*/__pycache__/*
+__pycache__/*
+.git/*
+.idea
+*.pickle
