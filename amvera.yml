@@ -7,4 +7,5 @@ meta:
 build:
   dockerfile: Dockerfile
   skip: false
-run: {}
+run:
+  persistenceMount: /app/data
