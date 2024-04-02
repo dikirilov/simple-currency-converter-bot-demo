@@ -1,6 +1,6 @@
 from loguru import logger
 import sys
-from apscheduler.util import ref_to_obj, obj_to_ref
+from typing import Any
 from apscheduler.job import Job as APSJob
 from telegram.ext import Job as PTBJob, Application
 
@@ -11,8 +11,10 @@ logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{mod
 
 
 class PTBJobStateAdapter:
-    def __init__(self, application: Application):
+    def __init__(self, application: Application, callback_func, **kwargs: Any):
         self.app = application
+        self.callback_func = callback_func
+        super().__init__(**kwargs)
 
     @staticmethod
     def _make_serializable(job: APSJob):
@@ -24,15 +26,17 @@ class PTBJobStateAdapter:
             ptb_job.data,
             ptb_job.chat_id,
             ptb_job.user_id,
-            obj_to_ref(ptb_job.callback),
         )
         return serializable_apsjob
 
     def _restore_ptbjob(self, job: APSJob) -> APSJob:
-        name, data, chat_id, user_id, callback_ref = job.args
-        callback = ref_to_obj(callback_ref)
-
-        ptb_job = self.app.job_queue.run_custom(callback, data=data, name=name, chat_id=chat_id, user_id=user_id,
-                                                job_kwargs={})
-        job.modify(args=(self.app.job_queue, ptb_job))
+        name, data, chat_id, user_id = job.args
+        ptb_job = PTBJob(
+            callback=self.callback_func,
+            data=data,
+            name=name,
+            chat_id=chat_id,
+            user_id=user_id,
+        )
+        job._modify(args=(self.app.job_queue, ptb_job))
         return job

@@ -19,7 +19,7 @@ class Scheduler(Protocol):
             self.cmd_unsub_label: self.unsubscribe
         }
 
-    async def adjust_tg(self, app: Application, **kwargs) -> None:
+    def adjust_tg(self, app: Application, callback_func, **kwargs) -> None:
         pass
 
     def set_callback(self, notify_func):

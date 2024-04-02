@@ -178,10 +178,8 @@ class TelegramBot(Ui):
                .build())
 
         if self.subscriber:
-            self.subscriber.adjust_tg(self.app)
+            self.subscriber.adjust_tg(self.app, self.notify)
             self.subscriber.set_callback(self.notify)
-            logger.info(f"Subscriber is defined, the notify function is: {self.notify=}")
-            logger.trace(f"{self.subscriber.__class__=}\n{self.subscriber._notify_func=}")
 
         # Commands
         self.app.add_handler(CommandHandler('start', self.start_command))

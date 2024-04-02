@@ -14,7 +14,8 @@ logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{mod
 
 class PTBJobStore(PTBJobStateAdapter, SQLAlchemyJobStore):
     def __init__(self, application: Application, **kwargs: Any) -> None:
-        super().__init__(application, **kwargs)
+        logger.trace(f"init {self.__class__.__name__} with kwargs: {kwargs}")
+        super(PTBJobStore, self).__init__(application, **kwargs)
 
     def add_job(self, job: APSJob) -> None:
         job = self._make_serializable(job)

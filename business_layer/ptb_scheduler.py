@@ -1,7 +1,6 @@
 import os
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes, Application
-from typing import Coroutine
 from business_layer.scheduler import Scheduler
 from utilities.custom_jobstore import PTBJobStore
 import sys
@@ -60,12 +59,16 @@ class PTBScheduler(Scheduler):
         logger.trace(f"notify from ptb_subscriber had been called, args: {args}, kwargs: {kwargs}")
         await self._notify_func(*args, **kwargs)
 
-    async def adjust_tg(self, app: Application, **kwargs):
-        # psql_url = "postgresql+asyncpg://tgbot:tgbot@amvera-dikirilov-cnpg-curr-bot-persist-rw/converter" # TODO
+    def adjust_tg(self, app: Application, callback_func, **kwargs):
+        # amvera-dikirilov-cnpg-curr-bot-persist-rw
+        # psql_url = "postgresql+asyncpg://tgbot:tgbot@localhost/converter"
+        # psql_url = "postgresql://tgbot:tgbot@localhost/converter"
         if JOB_PERSISTENCE > 0:
+            logger.trace(f"Adding PTBJobStore, {PSQL_URL=}")
             app.job_queue.scheduler.add_jobstore(
-                PTBJobStore(app, url=PSQL_URL),
+                PTBJobStore(application=app, callback_func=callback_func, url=PSQL_URL),
             )
+            logger.trace(f"{app.job_queue.scheduler._jobstores=}")
 
     async def subscribe(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
         subscription_meta = update.callback_query.data
