@@ -12,6 +12,7 @@ logger.remove()
 logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{module}</blue> | <lvl>{level}</lvl> | "
                                              "{message}", serialize=False)
 PSQL_URL = os.getenv("PSQL_URL")
+JOB_PERSISTENCE = int(os.getenv("JOB_PERSISTENCE", 0))
 
 
 class PTBScheduler(Scheduler):
@@ -60,10 +61,11 @@ class PTBScheduler(Scheduler):
         await self._notify_func(*args, **kwargs)
 
     async def adjust_tg(self, app: Application, **kwargs):
-        # psql_url = "postgresql+asyncpg://postgres:secret@localhost/testdb" # TODO
-        app.job_queue.scheduler.add_jobstore(
-            PTBJobStore(app, url=PSQL_URL),
-        )
+        # psql_url = "postgresql+asyncpg://tgbot:tgbot@amvera-dikirilov-cnpg-curr-bot-persist-rw/converter" # TODO
+        if JOB_PERSISTENCE > 0:
+            app.job_queue.scheduler.add_jobstore(
+                PTBJobStore(app, url=PSQL_URL),
+            )
 
     async def subscribe(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
         subscription_meta = update.callback_query.data

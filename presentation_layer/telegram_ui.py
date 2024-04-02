@@ -1,3 +1,5 @@
+import os
+
 from business_layer.converter import Converter
 from business_layer.scheduler import Scheduler
 from models.converted_query import ConvertedQuery
@@ -16,8 +18,7 @@ from loguru import logger
 logger.remove()
 logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{module}</blue> | <lvl>{level}</lvl> | "
                                              "{message}", serialize=False)
-# data/callback_data.pickle
-PERSISTENCE_FILE = "callback_data.pickle"
+PERSISTENCE_FILE = os.getenv("PERSISTENCE_FILE")
 
 
 class TelegramBot(Ui):
@@ -177,7 +178,7 @@ class TelegramBot(Ui):
                .build())
 
         if self.subscriber:
-            # self.subscriber.adjust_tg(self.app)
+            self.subscriber.adjust_tg(self.app)
             self.subscriber.set_callback(self.notify)
             logger.info(f"Subscriber is defined, the notify function is: {self.notify=}")
             logger.trace(f"{self.subscriber.__class__=}\n{self.subscriber._notify_func=}")
