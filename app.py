@@ -8,7 +8,6 @@ from business_layer.currency_updater import CurrencyUpdaterCBRF
 
 def main():
     converter = Converter(CurrencyUpdaterCBRF())
-    # ui = Console(converter)
     subscriber = PTBScheduler()
     ui = TelegramBot(converter=converter, token=os.getenv("TOKEN"), botname=os.getenv("BOTNAME"), subscriber=subscriber)
     ui.run()
