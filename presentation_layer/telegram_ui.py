@@ -19,6 +19,8 @@ logger.remove()
 logger.add(sys.stdout, level="TRACE", format="<green>{time}</green> | <blue>{module}</blue> | <lvl>{level}</lvl> | "
                                              "{message}", serialize=False)
 PERSISTENCE_FILE = os.getenv("PERSISTENCE_FILE")
+HELP_MESSAGE = os.getenv("HELP_MSG")
+START_MESSAGE = os.getenv("START_MSG", "Hello!")
 
 
 class TelegramBot(Ui):
@@ -33,18 +35,7 @@ class TelegramBot(Ui):
             raise ValueError("Telegram botname is not specified")
         self.__botname = botname
 
-        self.help_msg = f"""Бот предназначен для работы в inline-режиме.
-        Для его использования в любом чате необходимо ввести выражение в формате: 
-        '{self.__botname} <количество валюты> <валюта>'
-        
-        Количество валюты может быть введено как целым числом, так и дробным (например: 1.5).
-        Также поддерживаются простые арифметические операции (+, -, *, /).
-        Валюту можно ввести в виде кода (USD, EUR, ...) или названия (доллар США, евро, ...).
-        ----
-        Примеры:
-        '100 USD'
-        '1.5 EUR'
-        '100*10/4 долларов'"""
+        self.help_msg = HELP_MESSAGE
         self.subscriber = subscriber
         self.callback_cmds = {}
         if self.subscriber:
@@ -81,7 +72,7 @@ class TelegramBot(Ui):
 
     @staticmethod
     async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text('Бот для перевода из валюты в рубли согласно актуальному курсе ЦБ РФ')
+        await update.message.reply_text(START_MESSAGE)
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(self.help_msg)

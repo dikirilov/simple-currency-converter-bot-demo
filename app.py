@@ -1,7 +1,6 @@
 import os
 
 from business_layer.ptb_scheduler import PTBScheduler
-from presentation_layer.console import Console
 from presentation_layer.telegram_ui import TelegramBot
 from business_layer.converter import Converter
 from business_layer.currency_updater import CurrencyUpdaterCBRF
