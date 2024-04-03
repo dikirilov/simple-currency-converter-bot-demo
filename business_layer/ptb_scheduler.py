@@ -18,9 +18,9 @@ class PTBScheduler(Scheduler):
     def __init__(self):
         super().__init__()
         self.subscription_plans = {
-            "daily": {"label": "Ежедневно", "interval": 10},# 60*60*24},
-            "weekly": {"label": "Еженедельно", "interval": 15},# 60*60*24*7},
-            "monthly": {"label": "Ежемесячно", "interval": 20},#60*60*24*30}
+            "daily": {"label": "Ежедневно", "interval": 60*60*24},
+            "weekly": {"label": "Еженедельно", "interval": 60*60*24*7},
+            "monthly": {"label": "Ежемесячно", "interval": 60*60*24*30}
         }
 
     def create_inline_keyboard_sub(self, **kwargs) -> InlineKeyboardMarkup:
@@ -60,9 +60,6 @@ class PTBScheduler(Scheduler):
         await self._notify_func(*args, **kwargs)
 
     def adjust_tg(self, app: Application, callback_func, **kwargs):
-        # amvera-dikirilov-cnpg-curr-bot-persist-rw
-        # psql_url = "postgresql+asyncpg://tgbot:tgbot@localhost/converter"
-        # psql_url = "postgresql://tgbot:tgbot@localhost/converter"
         if JOB_PERSISTENCE > 0:
             logger.trace(f"Adding PTBJobStore, {PSQL_URL=}")
             app.job_queue.scheduler.add_jobstore(

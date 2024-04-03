@@ -7,15 +7,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-sqlalchemy = "^2.0.29"
 
 
 [tool.poetry.group.app.dependencies]
+sqlalchemy = "^2.0.29"
 loguru = "^0.7.2"
 aiohttp = "^3.9.3"
 python-telegram-bot = {extras = ["callback-data", "job-queue"], version = "^21.0.1"}
-asyncpg = "^0.29.0"
-greenlet = "^3.0.3"
 psycopg2-binary = "^2.9.9"
 
 [build-system]
