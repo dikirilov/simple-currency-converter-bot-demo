@@ -18,6 +18,15 @@ class ConvertedQuery:
                  amount: float,
                  query: Optional[str] = None,
                  ):
+        """
+        Initialize a new CurrencyConverter object.
+
+        Constructs a query in case it's not provided.
+
+        :param curr_rate (Currency2RubRate): The currency to ruble exchange rate object.
+        :param amount (float): The amount of currency to convert.
+        :param query (Optional[str], optional): A string query. Defaults to None.
+        """
         self.__id = str(uuid.uuid4())
         self.__curr_rate = curr_rate
         self.__amount = amount
@@ -30,6 +39,12 @@ class ConvertedQuery:
         self.__updated_at = datetime.now()
 
     def query_constructor(self):
+        """
+        A method that constructs a query using the amount and currency symbol.
+
+        Returns:
+        - A string representing the amount and currency symbol.
+        """
         return f"{self.__amount} {self.__curr_rate.curr.symbol}"
 
     @property

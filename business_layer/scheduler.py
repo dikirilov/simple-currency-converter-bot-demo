@@ -22,9 +22,6 @@ class Scheduler(Protocol):
     def adjust_tg(self, app: Application, callback_func, **kwargs) -> None:
         pass
 
-    def set_callback(self, notify_func):
-        self._notify_func = notify_func
-
     def create_inline_keyboard_sub(self, **kwargs) -> object:
         raise NotImplementedError
 

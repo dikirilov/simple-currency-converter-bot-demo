@@ -17,7 +17,7 @@ TIMEOUT = int(os.getenv("TIMEOUT"))
 
 class CurrencyUpdater(Protocol):
     @classmethod
-    async def get_currency_rates(cls) -> [Currency2RubRate]:
+    async def get_currency_rates(cls) -> Iterable[Currency2RubRate]:
         raise NotImplementedError
 
 
@@ -27,6 +27,11 @@ class CurrencyUpdaterCBRF(CurrencyUpdater):
 
     @classmethod
     async def get_currency_rates(cls) -> Iterable[Currency2RubRate]:
+        """
+        A function that fetches currency exchange rates and returns a list of Currency2RubRate objects
+
+        It utilizes aiohttp library to make requests to the CBRF API and parse gathered XML.
+        """
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(cls.TIMEOUT)) as session:
             async with session.get(cls.URL) as response:
                 logger.trace(f"Request to '{URL}':\nstatus is {response.status}")

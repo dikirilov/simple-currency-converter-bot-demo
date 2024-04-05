@@ -24,7 +24,16 @@ START_MESSAGE = os.getenv("START_MSG", "Hello!")
 
 
 class TelegramBot(Ui):
-    def __init__(self, converter: Converter, token: str, botname: str, subscriber: Scheduler = None):
+    def __init__(self, converter: Converter, token: str, botname: str, scheduler: Scheduler = None):
+        """
+        Initialize the Telegram bot with the given converter, token, botname, and optional subscriber.
+
+        Parameters:
+            converter (Converter): The converter object to use.
+            token (str): The token for the Telegram bot.
+            botname (str): The name of the Telegram bot.
+            scheduler (Scheduler, optional): The scheduler object if available. Defaults to None.
+        """
         super().__init__()
         self.app = None
         self.__converter = converter
@@ -36,13 +45,18 @@ class TelegramBot(Ui):
         self.__botname = botname
 
         self.help_msg = HELP_MESSAGE
-        self.subscriber = subscriber
+        self.scheduler = scheduler
         self.callback_cmds = {}
-        if self.subscriber:
-            self.callback_cmds.update(self.subscriber.cmds)
+        if self.scheduler:
+            self.callback_cmds.update(self.scheduler.cmds)
 
     @wraps
     async def reduce_freq(self, func):
+        """
+        A decorator to limit the number of calls to the given function.
+        :param update: An update object from PTB
+        :param context: A context object from PTB
+        """
         def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if context.user_data.get("last_call", datetime.now() - timedelta(days=1)) > datetime.now() - timedelta(seconds=2):
                 logger.warning(f"Too many calls from {update.effective_user.username}")
@@ -52,9 +66,24 @@ class TelegramBot(Ui):
         return wrapper
 
     async def populate_callback_cmds(self, cmd: str, func: callable):
+        """
+        Populate the callback commands dictionary with the provided command and corresponding function.
+        :param cmd: str - the command string
+        :param func: callable - the function to associate with the command
+        :return: None
+        """
         self.callback_cmds[cmd] = func
 
     async def callback_query_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """
+        A function to handle all callback queries. It calls the function associated with the callback query.
+        Callback query includes data which should be populated in the button that was clicked.
+        The 'cmd' and 'answer' parameters are needed for current handler function, all the others - for corresponding
+        function to be called.
+
+        :param update: An update object from PTB
+        :param context: A context object from PTB
+        """
         cb_data = update.callback_query.data
         logger.trace(f"{cb_data=}")
         if cb_data["cmd"] not in self.callback_cmds:
@@ -72,12 +101,33 @@ class TelegramBot(Ui):
 
     @staticmethod
     async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        A function to handle the start command in the Telegram bot. It replies to the user with the START_MESSAGE.
+
+        :param update: An update object from PTB
+        :param context: A context object from PTB
+        """
         await update.message.reply_text(START_MESSAGE)
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+            """
+            A function to handle the help command in the Telegram bot. It replies to the user with the help message.
+
+            :param update: An update object from PTB
+            :param context: A context object from PTB
+            """
         await update.message.reply_text(self.help_msg)
 
     async def convert_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        A function to handle the conversion of a user input query to a response message.
+        It processes the queries from chat with bot (not from inline queries), so it chooses the first matched
+        currency, but not letting choose.
+
+        :param update: An update object from PTB
+        :param context: A context object from PTB
+        """
         query = update.message.text
         if not query:
             return
@@ -92,15 +142,24 @@ class TelegramBot(Ui):
         logger.trace(f"{conv_queries=}")
         conv_query = conv_queries[0]
         msg = self.converted_query_to_msg(conv_query)
-        if self.subscriber:
-            reply_markup = self.subscriber.create_inline_keyboard_sub(data_for_scheduler=conv_query.query, answer=msg,
-                                                           chat_id=update.message.chat_id)
+        if self.scheduler:
+            reply_markup = self.scheduler.create_inline_keyboard_sub(data_for_scheduler=conv_query.query, answer=msg,
+                                                                     chat_id=update.message.chat_id)
         else:
             reply_markup = None
         await update.message.reply_text(text=msg, reply_markup=reply_markup)
 
     @staticmethod
     def converted_query_to_msg(conv_query: ConvertedQuery) -> str:
+        """
+        A function to compile a message based on ConvertedQuery provided.
+
+        Parameters:
+            conv_query (ConvertedQuery): The ConvertedQuery object containing the conversion details.
+
+        Returns:
+            str: A formatted message displaying the original and converted amounts with currency symbols.
+        """
         logger.trace(f"{conv_query=}")
         sum_rub = f"{conv_query.converted_amount:,.2f}".replace(",", " ")
         logger.trace(f"{sum_rub=}")
@@ -110,11 +169,27 @@ class TelegramBot(Ui):
 
     @staticmethod
     def converted_query_to_desc(conv_query: ConvertedQuery) -> str:
+        """
+        A function to compile a description based on ConvertedQuery provided.
+
+        Args:
+            conv_query (ConvertedQuery): The converted query object.
+
+        Returns:
+            str: The description of the query in Russian language.
+        """
         sum_orig = f"{conv_query.original_amount:,.2f}".replace(",", " ")
         return f"Перевести {sum_orig} {conv_query.curr_rate.curr.symbol} в рубли"
 
     @reduce_freq
     async def inline_query_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        A function to handle all inline queries from the Telegram bot.
+        Utilizes reduce_freq decorator to limit the number of calls to the given function.
+
+        :param update: An update object from PTB
+        :param context: A context object from PTB
+        """
         query = update.inline_query.query
         if not query:
             return
@@ -128,9 +203,9 @@ class TelegramBot(Ui):
         logger.trace(f"{conv_queries=}")
         for conv_query in conv_queries:
             msg = self.converted_query_to_msg(conv_query)
-            if self.subscriber:
-                reply_markup = self.subscriber.create_inline_keyboard_sub(data_for_scheduler=conv_query.query, answer=msg,
-                                                               chat_id=update.inline_query.from_user.id)
+            if self.scheduler:
+                reply_markup = self.scheduler.create_inline_keyboard_sub(data_for_scheduler=conv_query.query, answer=msg,
+                                                                         chat_id=update.inline_query.from_user.id)
             else:
                 reply_markup = None
             results.append(InlineQueryResultArticle(
@@ -143,6 +218,13 @@ class TelegramBot(Ui):
         await update.inline_query.answer(results)
 
     async def notify(self, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """
+        A function to notify users with subscription. It is called by the scheduler.
+        Current implementation assumes, it is the only function that could be used from scheduler.
+
+        Parameters:
+            context (ContextTypes.DEFAULT_TYPE): The context object containing job data.
+        """
         query = context.job.data
         logger.trace(f"notify: {query=}")
         logger.trace(f"{context.job.chat_id}")
@@ -153,13 +235,16 @@ class TelegramBot(Ui):
             return
         logger.trace(f"{conv_queries=}")
         conv_query = conv_queries[0]
-        reply_markup = self.subscriber.create_inline_keyboard_unsub(query=conv_query.query, chat_id=context.job.chat_id,
-                                                                    answer=self.converted_query_to_msg(conv_query))
+        reply_markup = self.scheduler.create_inline_keyboard_unsub(query=conv_query.query, chat_id=context.job.chat_id,
+                                                                   answer=self.converted_query_to_msg(conv_query))
         await context.bot.send_message(chat_id=context.job.chat_id,
                                        text=self.converted_query_to_msg(conv_query),
                                        reply_markup=reply_markup)
 
     def run(self):
+        """
+        A method to run the bot, setting up various handlers for commands, messages, and errors.
+        """
         logger.info('Starting bot')
         persistence = PicklePersistence(filepath=PERSISTENCE_FILE)
         self.app = (Application.builder()
@@ -168,9 +253,8 @@ class TelegramBot(Ui):
                .arbitrary_callback_data(True)
                .build())
 
-        if self.subscriber:
-            self.subscriber.adjust_tg(self.app, self.notify)
-            self.subscriber.set_callback(self.notify)
+        if self.scheduler:
+            self.scheduler.adjust_tg(self.app, self.notify)
 
         # Commands
         self.app.add_handler(CommandHandler('start', self.start_command))

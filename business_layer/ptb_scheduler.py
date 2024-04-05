@@ -16,7 +16,11 @@ JOB_PERSISTENCE = int(os.getenv("JOB_PERSISTENCE", 0))
 
 class PTBScheduler(Scheduler):
     def __init__(self):
+        """
+        Initialize the object with predefined subscription plans.
+        """
         super().__init__()
+        self.notify = None
         self.subscription_plans = {
             "daily": {"label": "Ежедневно", "interval": 60*60*24},
             "weekly": {"label": "Еженедельно", "interval": 60*60*24*7},
@@ -24,6 +28,12 @@ class PTBScheduler(Scheduler):
         }
 
     def create_inline_keyboard_sub(self, **kwargs) -> InlineKeyboardMarkup:
+        """
+        Generates an inline keyboard for subscribing to updates based on the subscription plans provided.
+
+        :param **kwargs: Additional keyword arguments.
+        :return: InlineKeyboardMarkup object for subscribing to updates.
+        """
         return InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
@@ -40,6 +50,12 @@ class PTBScheduler(Scheduler):
         ])
 
     def create_inline_keyboard_unsub(self, **kwargs) -> InlineKeyboardMarkup:
+        """
+        Generates an inline keyboard for unsubscribing to updates based on the subscription plans provided.
+
+        :param **kwargs: Additional keyword arguments.
+        :return: InlineKeyboardMarkup object for unsubscribing from updates.
+        """
         return InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
@@ -52,22 +68,28 @@ class PTBScheduler(Scheduler):
             ]
         ])
 
-    async def create_callback_data(self):
-        pass
-
-    async def notify(self, *args, **kwargs):
-        logger.trace(f"notify from ptb_subscriber had been called, args: {args}, kwargs: {kwargs}")
-        await self._notify_func(*args, **kwargs)
-
-    def adjust_tg(self, app: Application, callback_func, **kwargs):
+    def adjust_tg(self, app: Application, callback_func, **kwargs) -> None:
+        """
+        Adjusts the telegram application by adding a jobstore if JOB_PERSISTENCE is activated.
+        The jobstore is added to the app's job queue scheduler using the provided Application instance,
+        callback function, and additional keyword arguments.
+        """
         if JOB_PERSISTENCE > 0:
             logger.trace(f"Adding PTBJobStore, {PSQL_URL=}")
             app.job_queue.scheduler.add_jobstore(
                 PTBJobStore(application=app, callback_func=callback_func, url=PSQL_URL),
             )
-            logger.trace(f"{app.job_queue.scheduler._jobstores=}")
+            self.notify = callback_func
 
     async def subscribe(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+        """
+        A function to subscribe to updates. It is assumed, the data is provided with the callback query.
+        So, current implementation assumes, the subscription could be done via inline-keyboard only.
+
+        :param update: An update object from PTB
+        :param context: A context object from PTB
+        :return: A boolean indicating success or failure of the subscription.
+        """
         subscription_meta = update.callback_query.data
         logger.trace(f"{subscription_meta=}")
         type = subscription_meta["type"]
@@ -96,6 +118,14 @@ class PTBScheduler(Scheduler):
         return True
 
     async def unsubscribe(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+        """
+        A function to unsubscribe from updates. It is assumed, the data is provided with the callback query.
+        So, current implementation assumes, the unsubscribing could be done via inline-keyboard only.
+
+        :param update: An update object from PTB
+        :param context: A context object from PTB
+        :return: A boolean indicating success or failure of the unsubscribing.
+        """
         subscription_meta = update.callback_query.data
         chat_id = subscription_meta.get("chat_id", None)
         if chat_id is None:

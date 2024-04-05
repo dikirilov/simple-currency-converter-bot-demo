@@ -7,6 +7,9 @@ from business_layer.currency_updater import CurrencyUpdaterCBRF
 
 
 def main():
+    """
+    The main function initializes a Converter, a PTBScheduler, and a TelegramBot, then runs the UI.
+    """
     converter = Converter(CurrencyUpdaterCBRF())
     subscriber = PTBScheduler()
     ui = TelegramBot(converter=converter, token=os.getenv("TOKEN"), botname=os.getenv("BOTNAME"), subscriber=subscriber)

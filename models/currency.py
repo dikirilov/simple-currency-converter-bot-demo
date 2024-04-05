@@ -16,17 +16,18 @@ class Currency:
                  name: str,
                  symbol: str,
                  code: Optional[int] = None,
-                 match_expressions: Optional[list] = None
                  ):
+        """
+        Constructor for initializing the class with the given parameters.
+
+        :param name (str): The name of the object.
+        :param symbol (str): The symbol representing the object.
+        :param code (int, optional): The code associated with the object. Defaults to None.
+        """
         self.__id = uuid.uuid4()
         self._name = name
         self._symbol = symbol
         self._code = code
-        if match_expressions is None:
-            self._match_expressions = [code, name, symbol]
-        else:
-            self._match_expressions = match_expressions
-            self._match_expressions.extend([code, name, symbol])
         self.__created_at = datetime.now()
         self.__updated_at = datetime.now()
 
@@ -60,17 +61,6 @@ class Currency:
 
     def __eq__(self, other):
         return self._code == other.code
-
-    @property
-    def match_expressions(self):
-        return self._match_expressions
-
-    @match_expressions.setter
-    def match_expressions(self, match_expressions):
-        self._match_expressions = match_expressions
-
-    def append_match_expression(self, match_expression):
-        self._match_expressions.append(match_expression)
 
     @property
     def created_at(self):

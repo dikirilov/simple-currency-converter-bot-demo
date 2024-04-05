@@ -16,9 +16,15 @@ class Currency2RubRate:
                  curr: Currency,
                  rate: float
                  ):
+        """
+        Initialize the CurrencyConverter object with the given currency and exchange rate.
+
+        :param curr (Currency): The currency to be converted.
+        :param rate (float): The exchange rate for the currency conversion.
+        """
         self.__id = str(uuid.uuid4())
-        self.__curr : Currency = curr
-        self.__rate : float = rate
+        self.__curr: Currency = curr
+        self.__rate: float = rate
         self.__created_at = datetime.now()
         self.__updated_at = datetime.now()
 
